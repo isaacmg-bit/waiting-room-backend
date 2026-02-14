@@ -9,7 +9,7 @@ export class Event {
   date: string;
 
   @Prop({ required: true })
-  name: string;
+  title: string;
 
   @Prop({ required: true })
   color: string;
