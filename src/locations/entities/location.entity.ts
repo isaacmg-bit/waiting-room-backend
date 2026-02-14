@@ -15,7 +15,7 @@ export class Location {
   name: string;
 
   @Prop({ required: true })
-  userId: string;
+  description: string;
 }
 
 export const LocationSchema = SchemaFactory.createForClass(Location);
