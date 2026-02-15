@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-export type LocationDocument = HydratedDocument<Location>;
+export type LocationDocument = HydratedDocument<UserLocation>;
 
 @Schema({ timestamps: true })
-export class Location {
+export class UserLocation {
   @Prop({ required: true })
   lat: number;
 
@@ -21,4 +21,4 @@ export class Location {
   category: string;
 }
 
-export const LocationSchema = SchemaFactory.createForClass(Location);
+export const LocationSchema = SchemaFactory.createForClass(UserLocation);

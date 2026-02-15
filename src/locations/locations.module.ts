@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { LocationsService } from './locations.service';
 import { LocationsController } from './locations.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { LocationSchema, Location } from './entities/location.entity';
+import { LocationSchema, UserLocation } from './entities/location.entity';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: Location.name, schema: LocationSchema },
+      { name: UserLocation.name, schema: LocationSchema },
     ]),
   ],
   controllers: [LocationsController],

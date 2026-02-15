@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-export type EventDocument = HydratedDocument<Event>;
+export type EventDocument = HydratedDocument<CalendarEvent>;
 
 @Schema({ timestamps: true })
-export class Event {
+export class CalendarEvent {
   @Prop({ required: true })
   date: string;
 
@@ -15,4 +15,4 @@ export class Event {
   color: string;
 }
 
-export const EventSchema = SchemaFactory.createForClass(Event);
+export const EventSchema = SchemaFactory.createForClass(CalendarEvent);
