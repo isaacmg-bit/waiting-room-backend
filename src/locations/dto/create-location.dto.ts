@@ -3,4 +3,5 @@ export class CreateLocationDto {
   lng: number;
   name: string;
   description: string;
+  category: string;
 }

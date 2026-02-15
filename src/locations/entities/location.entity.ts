@@ -16,6 +16,9 @@ export class Location {
 
   @Prop({ required: true })
   description: string;
+
+  @Prop({ required: true })
+  category: string;
 }
 
 export const LocationSchema = SchemaFactory.createForClass(Location);
