@@ -1,16 +1,12 @@
 import { Module } from '@nestjs/common';
 import { LocationsService } from './locations.service';
 import { LocationsController } from './locations.controller';
-import { MongooseModule } from '@nestjs/mongoose';
-import { LocationSchema, UserLocation } from './entities/location.entity';
+import { SupabaseService } from 'src/supabase/supabase.service';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: UserLocation.name, schema: LocationSchema },
-    ]),
-  ],
+  imports: [],
   controllers: [LocationsController],
-  providers: [LocationsService],
+  providers: [LocationsService, SupabaseService],
+  exports: [LocationsService],
 })
 export class LocationsModule {}

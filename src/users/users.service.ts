@@ -1,34 +1,74 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { SupabaseService } from 'src/supabase/supabase.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(private supabaseService: SupabaseService) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User | null> {
-    const newUser = new this.userModel(createUserDto);
-    return await newUser.save();
+  async create(createUserDto: CreateUserDto) {
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('users')
+      .insert(createUserDto)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return data;
   }
 
-  async findAll(): Promise<User[] | null> {
-    return await this.userModel.find().exec();
+  async findAll() {
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('users')
+      .select('*');
+
+    if (error) throw error;
+
+    return data;
   }
 
-  async findOne(id: string): Promise<User | null> {
-    return await this.userModel.findById(id).exec();
+  async findOne(id: string) {
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('users')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+
+    return data;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
-    return await this.userModel
-      .findByIdAndUpdate(id, updateUserDto, { returnDocument: 'after' })
-      .exec();
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('users')
+      .update(updateUserDto)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return data;
   }
 
-  async remove(id: string): Promise<User | null> {
-    return await this.userModel.findByIdAndDelete(id).exec();
+  async remove(id: string) {
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('users')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return data;
   }
 }

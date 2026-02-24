@@ -38,11 +38,6 @@ export class LocationsController {
     return this.locationsService.update(id, updateLocationDto);
   }
 
-  @Delete('all')
-  removeAll() {
-    return this.locationsService.removeAll();
-  }
-
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.locationsService.remove(id);
