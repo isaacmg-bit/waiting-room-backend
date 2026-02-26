@@ -20,6 +20,13 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @Post('register-from-auth')
+  registerFromAuth(
+    @Body() body: { id: string; email: string; name: string; location: string },
+  ) {
+    return this.usersService.registerFromAuth(body);
+  }
+
   @Get()
   findAll() {
     return this.usersService.findAll();

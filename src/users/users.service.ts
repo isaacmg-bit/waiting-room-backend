@@ -20,6 +20,38 @@ export class UsersService {
     return data;
   }
 
+  async registerFromAuth(body: {
+    id: string;
+    email: string;
+    name: string;
+    location: string;
+  }) {
+    const { data: existing } = await this.supabaseService
+      .getClient()
+      .from('users')
+      .select('*')
+      .eq('id', body.id)
+      .single();
+
+    if (existing) return existing;
+
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('users')
+      .insert({
+        id: body.id,
+        email: body.email,
+        name: body.name,
+        location: body.location,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return data;
+  }
+
   async findAll() {
     const { data, error } = await this.supabaseService
       .getClient()
