@@ -27,7 +27,7 @@ export class UsersService {
       .insert({
         id: user.id,
         email: user.email,
-        name: 'User',
+        name: 'TemporaryUserName',
       })
       .select()
       .single();
