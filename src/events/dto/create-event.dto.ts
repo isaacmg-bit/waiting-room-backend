@@ -1,5 +1,5 @@
 export class CreateEventDto {
-  id: string
+  id: string;
   date: string;
   title: string;
   color: string;
