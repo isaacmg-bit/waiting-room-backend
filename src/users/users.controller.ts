@@ -8,25 +8,17 @@ import {
   Delete,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ProfileSyncDto } from './dto/profile-sync.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Post('profile-sync')
+  syncProfile(@Body() dto: ProfileSyncDto) {
+    return this.usersService.createProfileIfNotExists(dto);
   }
-
-  @Post('register-from-auth')
-  registerFromAuth(
-    @Body() body: { id: string; email: string; name: string; location: string },
-  ) {
-    return this.usersService.registerFromAuth(body);
-  }
-
   @Get()
   findAll() {
     return this.usersService.findAll();

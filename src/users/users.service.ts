@@ -1,48 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import { SupabaseService } from 'src/supabase/supabase.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { ProfileSyncDto } from './dto/profile-sync.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private supabaseService: SupabaseService) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const { data, error } = await this.supabaseService
-      .getClient()
-      .from('users')
-      .insert(createUserDto)
-      .select()
-      .single();
+  async createProfileIfNotExists(user: ProfileSyncDto) {
+    if (!user.id || !user.email) {
+      throw new Error('Invalid user data');
+    }
 
-    if (error) throw error;
+    const supabase = this.supabaseService.getClient();
 
-    return data;
-  }
-
-  async registerFromAuth(body: {
-    id: string;
-    email: string;
-    name: string;
-    location: string;
-  }) {
-    const { data: existing } = await this.supabaseService
-      .getClient()
+    const { data: existing } = await supabase
       .from('users')
       .select('*')
-      .eq('id', body.id)
-      .single();
+      .eq('id', user.id)
+      .maybeSingle();
 
     if (existing) return existing;
 
-    const { data, error } = await this.supabaseService
-      .getClient()
+    const { data, error } = await supabase
       .from('users')
       .insert({
-        id: body.id,
-        email: body.email,
-        name: body.name,
-        location: body.location,
+        id: user.id,
+        email: user.email,
+        name: 'User',
       })
       .select()
       .single();
