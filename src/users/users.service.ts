@@ -12,7 +12,7 @@ export class UsersService {
     const { data: existing } = await supabase
       .from('users')
       .select('*')
-      .eq('id', user.sub)
+      .eq('id', user.id)
       .maybeSingle();
 
     if (existing) return existing;
@@ -20,7 +20,7 @@ export class UsersService {
     const { data, error } = await supabase
       .from('users')
       .insert({
-        id: user.sub,
+        id: user.id,
         email: user.email,
         name: 'TemporaryUserName',
       })

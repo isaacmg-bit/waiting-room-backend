@@ -19,8 +19,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('profile-sync')
-  async syncProfile(@Req() req) {
-    return this.usersService.createProfileIfNotExists(req.user);
+  async syncProfile(@Body() body: any) {
+    return this.usersService.createProfileIfNotExists(body);
   }
 
   @Get()
