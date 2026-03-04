@@ -18,11 +18,6 @@ import { Req } from '@nestjs/common';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('profile-sync')
-  async syncProfile(@Body() body: any) {
-    return this.usersService.createProfileIfNotExists(body);
-  }
-
   @Get()
   findAll() {
     return this.usersService.findAll();

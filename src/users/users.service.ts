@@ -6,32 +6,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersService {
   constructor(private supabaseService: SupabaseService) {}
 
-  async createProfileIfNotExists(user: any) {
-    const supabase = this.supabaseService.getClient();
-
-    const { data: existing } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (existing) return existing;
-
-    const { data, error } = await supabase
-      .from('users')
-      .insert({
-        id: user.id,
-        email: user.email,
-        name: 'TemporaryUserName',
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data;
-  }
-
   async findAll() {
     const { data, error } = await this.supabaseService
       .getClient()
