@@ -12,6 +12,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Req } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('users')
@@ -24,9 +25,10 @@ export class UsersController {
   }
 
   @Get('me')
-  getMe(@Req() req) {
-    return req.user;
+  async getMe(@Req() req) {
+    return this.usersService.findOne(req.user.sub);
   }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
@@ -40,5 +42,10 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
+  }
+
+  @Post()
+  create(@Req() req, @Body() dto: CreateUserDto) {
+    return this.usersService.create(req.user.sub, req.user.email, dto);
   }
 }
