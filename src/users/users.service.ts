@@ -1,23 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { SupabaseService } from 'src/supabase/supabase.service';
-import { ProfileSyncDto } from './dto/profile-sync.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private supabaseService: SupabaseService) {}
 
-  async createProfileIfNotExists(user: ProfileSyncDto) {
-    if (!user.id || !user.email) {
-      throw new Error('Invalid user data');
-    }
-
+  async createProfileIfNotExists(user: any) {
     const supabase = this.supabaseService.getClient();
 
     const { data: existing } = await supabase
       .from('users')
       .select('*')
-      .eq('id', user.id)
+      .eq('id', user.sub)
       .maybeSingle();
 
     if (existing) return existing;
@@ -25,7 +20,7 @@ export class UsersService {
     const { data, error } = await supabase
       .from('users')
       .insert({
-        id: user.id,
+        id: user.sub,
         email: user.email,
         name: 'TemporaryUserName',
       })

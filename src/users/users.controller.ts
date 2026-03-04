@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ProfileSyncDto } from './dto/profile-sync.dto';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Req } from '@nestjs/common';
@@ -20,9 +19,10 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('profile-sync')
-  syncProfile(@Body() dto: ProfileSyncDto) {
-    return this.usersService.createProfileIfNotExists(dto);
+  async syncProfile(@Req() req) {
+    return this.usersService.createProfileIfNotExists(req.user);
   }
+
   @Get()
   findAll() {
     return this.usersService.findAll();
