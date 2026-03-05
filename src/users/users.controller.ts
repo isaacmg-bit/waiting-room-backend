@@ -26,7 +26,7 @@ export class UsersController {
 
   @Get('me')
   async getMe(@Req() req) {
-    return this.usersService.findOne(req.user.sub);
+    return this.usersService.findOne(req.user.id);
   }
 
   @Get(':id')
@@ -46,6 +46,6 @@ export class UsersController {
 
   @Post()
   create(@Req() req, @Body() dto: CreateUserDto) {
-    return this.usersService.create(req.user.sub, req.user.email, dto);
+    return this.usersService.create(req.user.id, req.user.email, dto);
   }
 }

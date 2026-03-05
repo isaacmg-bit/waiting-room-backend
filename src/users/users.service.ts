@@ -24,7 +24,7 @@ export class UsersService {
       .from('users')
       .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
 
