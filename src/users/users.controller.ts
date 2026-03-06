@@ -44,7 +44,7 @@ export class UsersController {
     return this.usersService.remove(id);
   }
 
-  @Post()
+  @Post('profile-sync')
   create(@Req() req, @Body() dto: CreateUserDto) {
     return this.usersService.create(req.user.id, req.user.email, dto);
   }
