@@ -8,11 +8,11 @@ import {
   Delete,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserProfileDto } from './dto/update-userprofile.dto';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Req } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserProfileDto } from './dto/create-userprofile.dto';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('users')
@@ -35,7 +35,7 @@ export class UsersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserProfileDto) {
     return this.usersService.update(id, updateUserDto);
   }
 
@@ -45,7 +45,7 @@ export class UsersController {
   }
 
   @Post('profile-sync')
-  create(@Req() req, @Body() dto: CreateUserDto) {
+  create(@Req() req, @Body() dto: CreateUserProfileDto) {
     return this.usersService.create(req.user.id, req.user.email, dto);
   }
 }

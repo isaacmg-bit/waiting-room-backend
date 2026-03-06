@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SupabaseService } from 'src/supabase/supabase.service';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserProfileDto } from './dto/update-userprofile.dto';
+import { CreateUserProfileDto } from './dto/create-userprofile.dto';
 
 @Injectable()
 export class UsersService {
@@ -10,7 +10,7 @@ export class UsersService {
   async findAll() {
     const { data, error } = await this.supabaseService
       .getClient()
-      .from('users')
+      .from('userprofile')
       .select('*');
 
     if (error) throw error;
@@ -21,7 +21,7 @@ export class UsersService {
   async findOne(id: string) {
     const { data, error } = await this.supabaseService
       .getClient()
-      .from('users')
+      .from('userprofile')
       .select('*')
       .eq('id', id)
       .maybeSingle();
@@ -31,10 +31,10 @@ export class UsersService {
     return data;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserProfileDto) {
     const { data, error } = await this.supabaseService
       .getClient()
-      .from('users')
+      .from('userprofile')
       .update(updateUserDto)
       .eq('id', id)
       .select()
@@ -48,7 +48,7 @@ export class UsersService {
   async remove(id: string) {
     const { data, error } = await this.supabaseService
       .getClient()
-      .from('users')
+      .from('userprofile')
       .delete()
       .eq('id', id)
       .select()
@@ -59,10 +59,10 @@ export class UsersService {
     return data;
   }
 
-  async create(id: string, email: string, dto: CreateUserDto) {
+  async create(id: string, email: string, dto: CreateUserProfileDto) {
     const { data, error } = await this.supabaseService
       .getClient()
-      .from('users')
+      .from('userprofile')
       .insert({
         id,
         email,

@@ -1,4 +1,4 @@
-export class CreateUserDto {
+export class CreateUserProfileDto {
   name: string;
   location: string;
 }
