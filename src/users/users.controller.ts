@@ -26,7 +26,15 @@ export class UsersController {
 
   @Get('me')
   async getMe(@Req() req) {
-    return this.usersService.findOne(req.user.id);
+    const userId = req.user.id;
+
+    const user = await this.usersService.findOne(userId);
+
+    if (!user) {
+      return req.user;
+    }
+
+    return user;
   }
 
   @Get(':id')
