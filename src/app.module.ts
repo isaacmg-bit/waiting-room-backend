@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { LocationsModule } from './locations/locations.module';
 import { EventsModule } from './events/events.module';
 import { AuthModule } from './auth/auth.module';
+import { GalleryModule } from './gallery/gallery.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     LocationsModule,
     EventsModule,
+    GalleryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
