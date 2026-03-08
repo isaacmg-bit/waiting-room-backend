@@ -57,6 +57,13 @@ export class GalleryService {
     if (!photo || photo.user_id !== userId)
       throw new BadRequestException('Photo not found');
 
+    const { error: storageError } = await this.supabaseService
+      .getClient()
+      .storage.from('gallery')
+      .remove([photo.url]);
+
+    if (storageError) throw storageError;
+
     const { data, error } = await this.supabaseService
       .getClient()
       .from('user_gallery_photos')
