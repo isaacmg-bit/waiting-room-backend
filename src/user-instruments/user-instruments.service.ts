@@ -56,4 +56,17 @@ export class UserInstrumentsService {
     if (error) throw error;
     return data;
   }
+
+  async update(id: string, level: string) {
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('user_instruments')
+      .update({ level })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
 }

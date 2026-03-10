@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Patch,
+} from '@nestjs/common';
 import { UserInstrumentsService } from './user-instruments.service';
 import { CreateUserInstrumentDto } from './dto/create-user-instrument.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -20,6 +28,11 @@ export class UserInstrumentsController {
   @Post()
   create(@Req() req, @Body() dto: CreateUserInstrumentDto) {
     return this.userInstrumentsService.create(req.user.id, dto);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: CreateUserInstrumentDto) {
+    return this.userInstrumentsService.update(id, dto.level);
   }
 
   @Delete(':id')
