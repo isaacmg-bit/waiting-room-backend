@@ -26,7 +26,18 @@ export class UserInstrumentsService {
         instrument_id: dto.instrument_id,
         level: dto.level,
       })
-      .select()
+      .select(
+        `
+      id,
+      level,
+      instrument_id,
+      instruments (
+        id,
+        instrument_name,
+        instrument_family
+      )
+    `,
+      )
       .single();
 
     if (error) throw error;
