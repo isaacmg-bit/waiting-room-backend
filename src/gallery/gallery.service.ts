@@ -27,7 +27,8 @@ export class GalleryService {
           url: dto.url,
           position: dto.position || existingPhotos.length,
         },
-      ]);
+      ])
+      .select();
 
     if (error) throw error;
     return data;

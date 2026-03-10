@@ -10,7 +10,7 @@ export class UsersService {
   async findAll() {
     const { data, error } = await this.supabaseService
       .getClient()
-      .from('userprofile')
+      .from('user_profile')
       .select('*');
 
     if (error) throw error;
@@ -21,7 +21,7 @@ export class UsersService {
   async findOne(id: string) {
     const { data, error } = await this.supabaseService
       .getClient()
-      .from('userprofile')
+      .from('user_profile')
       .select('*')
       .eq('id', id)
       .maybeSingle();
@@ -34,7 +34,7 @@ export class UsersService {
   async update(id: string, updateUserDto: UpdateUserProfileDto) {
     const { data, error } = await this.supabaseService
       .getClient()
-      .from('userprofile')
+      .from('user_profile')
       .update(updateUserDto)
       .eq('id', id)
       .select()
@@ -48,7 +48,7 @@ export class UsersService {
   async remove(id: string) {
     const { data, error } = await this.supabaseService
       .getClient()
-      .from('userprofile')
+      .from('user_profile')
       .delete()
       .eq('id', id)
       .select()
@@ -62,7 +62,7 @@ export class UsersService {
   async create(id: string, email: string, dto: CreateUserProfileDto) {
     const { data, error } = await this.supabaseService
       .getClient()
-      .from('userprofile')
+      .from('user_profile')
       .insert({
         id,
         email,

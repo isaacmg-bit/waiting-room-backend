@@ -19,7 +19,8 @@ export class GalleryController {
 
   @Post()
   async create(@Req() req, @Body() dto: CreateGalleryDto) {
-    return this.galleryService.create(req.user.id, dto);
+    const [createdPhoto] = await this.galleryService.create(req.user.id, dto);
+    return createdPhoto;
   }
 
   @Get('me')
