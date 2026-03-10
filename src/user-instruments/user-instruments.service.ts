@@ -1,26 +1,48 @@
 import { Injectable } from '@nestjs/common';
+import { SupabaseService } from 'src/supabase/supabase.service';
 import { CreateUserInstrumentDto } from './dto/create-user-instrument.dto';
-import { UpdateUserInstrumentDto } from './dto/update-user-instrument.dto';
 
 @Injectable()
 export class UserInstrumentsService {
-  create(createUserInstrumentDto: CreateUserInstrumentDto) {
-    return 'This action adds a new userInstrument';
+  constructor(private supabaseService: SupabaseService) {}
+
+  async findByUser(userId: string) {
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('user_instruments')
+      .select('*, instruments(*)')
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    return data;
   }
 
-  findAll() {
-    return `This action returns all userInstruments`;
+  async create(userId: string, dto: CreateUserInstrumentDto) {
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('user_instruments')
+      .insert({
+        user_id: userId,
+        instrument_id: dto.instrument_id,
+        level: dto.level,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} userInstrument`;
-  }
+  async remove(id: string) {
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('user_instruments')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
 
-  update(id: number, updateUserInstrumentDto: UpdateUserInstrumentDto) {
-    return `This action updates a #${id} userInstrument`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} userInstrument`;
+    if (error) throw error;
+    return data;
   }
 }
