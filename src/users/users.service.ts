@@ -68,6 +68,7 @@ export class UsersService {
         email,
         name: dto.name,
         location: dto.location,
+        location_point: dto.location_point,
       })
       .select()
       .single();
