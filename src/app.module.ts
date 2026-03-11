@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { GalleryModule } from './gallery/gallery.module';
 import { InstrumentsModule } from './instruments/instruments.module';
 import { UserInstrumentsModule } from './user-instruments/user-instruments.module';
+import { UserTheoryModule } from './user-theory/user-theory.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UserInstrumentsModule } from './user-instruments/user-instruments.modul
     GalleryModule,
     InstrumentsModule,
     UserInstrumentsModule,
+    UserTheoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
