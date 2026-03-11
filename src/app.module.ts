@@ -10,6 +10,8 @@ import { GalleryModule } from './gallery/gallery.module';
 import { InstrumentsModule } from './instruments/instruments.module';
 import { UserInstrumentsModule } from './user-instruments/user-instruments.module';
 import { UserTheoryModule } from './user-theory/user-theory.module';
+import { GenresModule } from './genres/genres.module';
+import { UserGenresModule } from './user-genres/user-genres.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { UserTheoryModule } from './user-theory/user-theory.module';
     InstrumentsModule,
     UserInstrumentsModule,
     UserTheoryModule,
+    GenresModule,
+    UserGenresModule,
   ],
   controllers: [AppController],
   providers: [AppService],
