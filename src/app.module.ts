@@ -12,6 +12,7 @@ import { UserInstrumentsModule } from './user-instruments/user-instruments.modul
 import { UserTheoryModule } from './user-theory/user-theory.module';
 import { GenresModule } from './genres/genres.module';
 import { UserGenresModule } from './user-genres/user-genres.module';
+import { UserBandsModule } from './user-bands/user-bands.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UserGenresModule } from './user-genres/user-genres.module';
     UserTheoryModule,
     GenresModule,
     UserGenresModule,
+    UserBandsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

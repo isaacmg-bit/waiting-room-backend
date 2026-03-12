@@ -68,7 +68,11 @@ export class UsersService {
         email,
         name: dto.name,
         location: dto.location,
+        bio: dto.bio,
+        gear: dto.gear,
+        rehearsal_space: dto.rehearsal_space,
         location_point: dto.location_point,
+        social_links: dto.social_links || [],
       })
       .select()
       .single();
