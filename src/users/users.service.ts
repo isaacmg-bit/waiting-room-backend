@@ -73,6 +73,7 @@ export class UsersService {
         rehearsal_space: dto.rehearsal_space,
         location_point: dto.location_point,
         social_links: dto.social_links || [],
+        role: 'user',
       })
       .select()
       .single();

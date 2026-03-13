@@ -6,4 +6,5 @@ export class CreateUserProfileDto {
   rehearsal_space: string;
   location_point?: string;
   social_links?: Array<{ platform: string; url: string }>;
+  role?: 'user' | 'admin';
 }
