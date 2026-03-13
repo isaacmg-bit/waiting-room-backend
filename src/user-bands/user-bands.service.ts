@@ -6,7 +6,7 @@ import { SupabaseService } from 'src/supabase/supabase.service';
 export class UserBandsService {
   constructor(private supabaseService: SupabaseService) {}
 
-  async findByUser(userId: string) {
+  async findByUserId(userId: string) {
     const { data, error } = await this.supabaseService
       .getClient()
       .from('user_bands')

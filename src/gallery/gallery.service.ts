@@ -34,7 +34,7 @@ export class GalleryService {
     return data;
   }
 
-  async findByUser(userId: string) {
+  async findByUserId(userId: string) {
     const { data, error } = await this.supabaseService
       .getClient()
       .from('user_gallery_photos')

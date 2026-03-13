@@ -12,7 +12,12 @@ export class UserBandsController {
 
   @Get('me')
   findAll(@Req() req) {
-    return this.userBandsService.findByUser(req.user.id);
+    return this.userBandsService.findByUserId(req.user.id);
+  }
+
+  @Get(':userId')
+  getBandsByUserId(@Param('userId') userId: string) {
+    return this.userBandsService.findByUserId(userId);
   }
 
   @Post()

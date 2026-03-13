@@ -22,7 +22,12 @@ export class UserInstrumentsController {
 
   @Get('me')
   findAll(@Req() req) {
-    return this.userInstrumentsService.findByUser(req.user.id);
+    return this.userInstrumentsService.findByUserId(req.user.id);
+  }
+
+  @Get(':userId')
+  getInstrumentsByUserId(@Param('userId') userId: string) {
+    return this.userInstrumentsService.findByUserId(userId);
   }
 
   @Post()

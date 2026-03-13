@@ -25,7 +25,12 @@ export class GalleryController {
 
   @Get('me')
   async getMyGallery(@Req() req) {
-    return this.galleryService.findByUser(req.user.id);
+    return this.galleryService.findByUserId(req.user.id);
+  }
+
+  @Get(':userId')
+  getGalleryByUserId(@Param('userId') userId: string) {
+    return this.galleryService.findByUserId(userId);
   }
 
   @Delete(':id')

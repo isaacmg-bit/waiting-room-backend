@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
 import { UserTheoryService } from './user-theory.service';
 import { CreateUserTheoryDto } from './dto/create-user-theory.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -12,6 +12,11 @@ export class UserTheoryController {
   @Get('me')
   findMe(@Req() req) {
     return this.userTheoryService.findByUserId(req.user.id);
+  }
+
+  @Get(':userId')
+  getTheoryByUserId(@Param('userId') userId: string) {
+    return this.userTheoryService.findByUserId(userId);
   }
 
   @Post()

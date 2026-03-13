@@ -6,7 +6,7 @@ import { CreateUserGenreDto } from './dto/create-user-genre.dto';
 export class UserGenresService {
   constructor(private supabaseService: SupabaseService) {}
 
-  async findByUser(userId: string) {
+  async findByUserId(userId: string) {
     const { data, error } = await this.supabaseService
       .getClient()
       .from('user_genres')

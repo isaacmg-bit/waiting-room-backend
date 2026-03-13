@@ -11,8 +11,7 @@ export class UserTheoryService {
       .getClient()
       .from('user_theory')
       .select('*')
-      .eq('user_id', userId)
-      .maybeSingle();
+      .eq('user_id', userId);
 
     if (error) throw error;
     return data;

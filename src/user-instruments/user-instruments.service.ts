@@ -6,7 +6,7 @@ import { CreateUserInstrumentDto } from './dto/create-user-instrument.dto';
 export class UserInstrumentsService {
   constructor(private supabaseService: SupabaseService) {}
 
-  async findByUser(userId: string) {
+  async findByUserId(userId: string) {
     const { data, error } = await this.supabaseService
       .getClient()
       .from('user_instruments')

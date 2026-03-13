@@ -12,7 +12,12 @@ export class UserGenresController {
 
   @Get('me')
   findAll(@Req() req) {
-    return this.userGenresService.findByUser(req.user.id);
+    return this.userGenresService.findByUserId(req.user.id);
+  }
+
+  @Get(':userId')
+  getGenreByUserId(@Param('userId') userId: string) {
+    return this.userGenresService.findByUserId(userId);
   }
 
   @Post()
