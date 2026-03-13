@@ -13,6 +13,7 @@ import { UserTheoryModule } from './user-theory/user-theory.module';
 import { GenresModule } from './genres/genres.module';
 import { UserGenresModule } from './user-genres/user-genres.module';
 import { UserBandsModule } from './user-bands/user-bands.module';
+import { MusicianSearchModule } from './musician-search/musician-search.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { UserBandsModule } from './user-bands/user-bands.module';
     GenresModule,
     UserGenresModule,
     UserBandsModule,
+    MusicianSearchModule,
   ],
   controllers: [AppController],
   providers: [AppService],
