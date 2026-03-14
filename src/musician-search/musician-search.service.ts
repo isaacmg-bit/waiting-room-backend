@@ -17,6 +17,11 @@ export interface MusicianSearchResult {
   name: string;
   profile_photo_url: string | null;
   distance_km: number;
+  location: string;
+  instruments?: string;
+  genres?: string;
+  bands?: string;
+  theoryLevels?: string;
 }
 
 @Injectable()
