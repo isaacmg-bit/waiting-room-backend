@@ -109,4 +109,18 @@ export class MusicianSearchService {
       limit,
     });
   }
+
+  async searchRandom(): Promise<MusicianSearchResult[]> {
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .rpc('feature_random_users', {
+        p_count: 4,
+      });
+
+    if (error) {
+      throw new Error(`Search failed: ${error.message}`);
+    }
+
+    return (data || []) as MusicianSearchResult[];
+  }
 }
