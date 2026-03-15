@@ -82,5 +82,4 @@ export class UsersService {
 
     return data;
   }
-
 }
