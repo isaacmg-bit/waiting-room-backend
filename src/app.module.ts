@@ -14,6 +14,7 @@ import { GenresModule } from './genres/genres.module';
 import { UserGenresModule } from './user-genres/user-genres.module';
 import { UserBandsModule } from './user-bands/user-bands.module';
 import { MusicianSearchModule } from './musician-search/musician-search.module';
+import { CityModule } from './city/city.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { MusicianSearchModule } from './musician-search/musician-search.module';
     UserGenresModule,
     UserBandsModule,
     MusicianSearchModule,
+    CityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
