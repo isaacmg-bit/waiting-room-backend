@@ -2,16 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { SupabaseService } from 'src/supabase/supabase.service';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class EventsService {
   constructor(private supabaseService: SupabaseService) {}
 
-  async create(dto: CreateEventDto): Promise<any> {
+  async create(userId: string, dto: CreateEventDto) {
     const { data, error } = await this.supabaseService
       .getClient()
       .from('events')
       .insert({
+        user_id: userId,
         title: dto.title,
         color: dto.color,
         event_date: dto.date,
@@ -20,45 +22,45 @@ export class EventsService {
       .single();
 
     if (error) throw error;
-
     return data;
   }
 
-  async findAll(): Promise<any> {
+  async findAllMe(userId: string): Promise<any[]> {
     const { data, error } = await this.supabaseService
       .getClient()
       .from('events')
-      .select('*');
+      .select('*')
+      .eq('user_id', userId);
 
     if (error) throw error;
 
-    return data?.map((event) => ({
-      id: event.id,
-      title: event.title,
-      color: event.color,
+    return (data || []).map((event) => ({
+      ...event,
       date: event.event_date,
     }));
   }
 
-  async findOne(id: string): Promise<any> {
+  async findOne(id: string, userId: string): Promise<any> {
     const { data, error } = await this.supabaseService
       .getClient()
       .from('events')
       .select('*')
       .eq('id', id)
+      .eq('user_id', userId)
       .single();
 
-    if (error) throw error;
+    if (error || !data)
+      throw new NotFoundException(
+        'Event not found / You do not have permission',
+      );
 
     return {
-      id: data.id,
-      title: data.title,
-      color: data.color,
+      ...data,
       date: data.event_date,
     };
   }
 
-  async update(id: string, dto: UpdateEventDto): Promise<any> {
+  async update(id: string, dto: UpdateEventDto, userId: string): Promise<any> {
     const { data, error } = await this.supabaseService
       .getClient()
       .from('events')
@@ -68,21 +70,29 @@ export class EventsService {
         event_date: dto.date,
       })
       .eq('id', id)
+      .eq('user_id', userId)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error || !data)
+      throw new ForbiddenException('You cannot edit this event');
 
     return data;
   }
 
-  async remove(id: string): Promise<any> {
-    const { error } = await this.supabaseService
+  async remove(id: string, userId: string): Promise<any> {
+    const { data, error } = await this.supabaseService
       .getClient()
       .from('events')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select();
 
-    if (error) throw error;
+    if (error || !data || data.length === 0) {
+      throw new ForbiddenException('You cannot delete this event');
+    }
+
+    return { message: 'Event deleted' };
   }
 }
