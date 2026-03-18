@@ -44,8 +44,23 @@ export class EventsService {
     }));
   }
 
-  async findOne(id: string, userId: string): Promise<any> {
+  async findAllPublic(): Promise<any[]> {
     const { data, error } = await this.supabaseService
+      .getClient()
+      .from('events')
+      .select('*')
+      .eq('is_public', true);
+
+    if (error) throw error;
+
+    return (data || []).map((event) => ({
+      ...event,
+      date: event.event_date,
+    }));
+  }
+
+  async findOne(id: string, userId: string): Promise<any> {
+    const ownerRes = await this.supabaseService
       .getClient()
       .from('events')
       .select('*')
@@ -53,15 +68,29 @@ export class EventsService {
       .eq('user_id', userId)
       .single();
 
-    if (error || !data)
+    if (ownerRes.error && ownerRes.error.code !== 'PGRST116') {
+      throw ownerRes.error;
+    }
+
+    if (ownerRes.data) {
+      return { ...ownerRes.data, date: ownerRes.data.event_date };
+    }
+
+    const publicRes = await this.supabaseService
+      .getClient()
+      .from('events')
+      .select('*')
+      .eq('id', id)
+      .eq('is_public', true)
+      .single();
+
+    if (publicRes.error || !publicRes.data) {
       throw new NotFoundException(
         'Event not found / You do not have permission',
       );
+    }
 
-    return {
-      ...data,
-      date: data.event_date,
-    };
+    return { ...publicRes.data, date: publicRes.data.event_date };
   }
 
   async update(id: string, dto: UpdateEventDto, userId: string): Promise<any> {
