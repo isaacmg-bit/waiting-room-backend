@@ -14,9 +14,13 @@ export class EventsService {
       .from('events')
       .insert({
         user_id: userId,
+        event_date: dto.date,
         title: dto.title,
         color: dto.color,
-        event_date: dto.date,
+        event_type: dto.event_type,
+        is_public: dto.is_public,
+        street: dto.street,
+        location_point: dto.location_point,
       })
       .select()
       .single();
@@ -65,9 +69,13 @@ export class EventsService {
       .getClient()
       .from('events')
       .update({
+        event_date: dto.date,
         title: dto.title,
         color: dto.color,
-        event_date: dto.date,
+        event_type: dto.event_type,
+        is_public: dto.is_public,
+        street: dto.street,
+        location_point: dto.location_point,
       })
       .eq('id', id)
       .eq('user_id', userId)

@@ -56,5 +56,4 @@ export class UsersController {
   create(@Req() req, @Body() dto: CreateUserProfileDto) {
     return this.usersService.create(req.user.id, req.user.email, dto);
   }
-
 }
