@@ -35,7 +35,7 @@ export class EventsController {
   }
 
   @Get('public')
-  async findAllPublic(@Req() req: AuthenticatedRequest) {
+  async findAllPublic() {
     return await this.eventsService.findAllPublic();
   }
 

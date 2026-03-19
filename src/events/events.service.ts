@@ -1,38 +1,71 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { SupabaseService } from 'src/supabase/supabase.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { SupabaseService } from 'src/supabase/supabase.service';
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class EventsService {
   constructor(private supabaseService: SupabaseService) {}
 
+  private toWkt(location?: { lat: number; lng: number } | null): string | null {
+    if (location === undefined || location === null) return null;
+    const { lat, lng } = location as any;
+    if (
+      typeof lat !== 'number' ||
+      typeof lng !== 'number' ||
+      Number.isNaN(lat) ||
+      Number.isNaN(lng)
+    ) {
+      throw new BadRequestException(
+        'location_point must be { lat: number, lng: number }',
+      );
+    }
+    return `SRID=4326;POINT(${lng} ${lat})`;
+  }
+
   async create(userId: string, dto: CreateEventDto) {
+    const wkt = this.toWkt((dto as any).location_point);
+
+    const insertPayload: any = {
+      user_id: userId,
+      event_date: dto.date,
+      title: dto.title,
+      color: dto.color,
+      event_type: dto.event_type,
+      is_public: dto.is_public,
+      street: dto.street,
+      location_point: wkt,
+    };
+
     const { data, error } = await this.supabaseService
       .getClient()
       .from('events')
-      .insert({
-        user_id: userId,
-        event_date: dto.date,
-        title: dto.title,
-        color: dto.color,
-        event_type: dto.event_type,
-        is_public: dto.is_public,
-        street: dto.street,
-        location_point: dto.location_point,
-      })
-      .select()
+      .insert(insertPayload)
+      .select('id')
       .single();
 
     if (error) throw error;
-    return data;
+
+    const { data: row, error: rowErr } = await this.supabaseService
+      .getClient()
+      .from('events_with_location')
+      .select('*')
+      .eq('id', data.id)
+      .single();
+
+    if (rowErr) throw rowErr;
+    return { ...row, date: row.event_date };
   }
 
   async findAllMe(userId: string): Promise<any[]> {
     const { data, error } = await this.supabaseService
       .getClient()
-      .from('events')
+      .from('events_with_location')
       .select('*')
       .eq('user_id', userId);
 
@@ -47,7 +80,7 @@ export class EventsService {
   async findAllPublic(): Promise<any[]> {
     const { data, error } = await this.supabaseService
       .getClient()
-      .from('events')
+      .from('events_with_location')
       .select('*')
       .eq('is_public', true);
 
@@ -62,7 +95,7 @@ export class EventsService {
   async findOne(id: string, userId: string): Promise<any> {
     const ownerRes = await this.supabaseService
       .getClient()
-      .from('events')
+      .from('events_with_location')
       .select('*')
       .eq('id', id)
       .eq('user_id', userId)
@@ -78,7 +111,7 @@ export class EventsService {
 
     const publicRes = await this.supabaseService
       .getClient()
-      .from('events')
+      .from('events_with_location')
       .select('*')
       .eq('id', id)
       .eq('is_public', true)
@@ -94,27 +127,50 @@ export class EventsService {
   }
 
   async update(id: string, dto: UpdateEventDto, userId: string): Promise<any> {
+    const hasLocationKey = Object.prototype.hasOwnProperty.call(
+      dto,
+      'location_point',
+    );
+    const wkt = hasLocationKey
+      ? this.toWkt((dto as any).location_point)
+      : undefined;
+
+    const updatePayload: any = {
+      event_date: dto.date,
+      title: dto.title,
+      color: dto.color,
+      event_type: dto.event_type,
+      is_public: dto.is_public,
+      street: dto.street,
+    };
+
+    if (hasLocationKey) {
+      updatePayload.location_point = wkt;
+    }
+
     const { data, error } = await this.supabaseService
       .getClient()
       .from('events')
-      .update({
-        event_date: dto.date,
-        title: dto.title,
-        color: dto.color,
-        event_type: dto.event_type,
-        is_public: dto.is_public,
-        street: dto.street,
-        location_point: dto.location_point,
-      })
+      .update(updatePayload)
       .eq('id', id)
       .eq('user_id', userId)
-      .select()
+      .select('id')
       .single();
 
-    if (error || !data)
+    if (error) {
       throw new ForbiddenException('You cannot edit this event');
+    }
+    if (!data) throw new ForbiddenException('You cannot edit this event');
 
-    return data;
+    const { data: row, error: rowErr } = await this.supabaseService
+      .getClient()
+      .from('events_with_location')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (rowErr) throw rowErr;
+    return { ...row, date: row.event_date };
   }
 
   async remove(id: string, userId: string): Promise<any> {

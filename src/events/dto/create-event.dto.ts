@@ -2,8 +2,8 @@ export class CreateEventDto {
   date: string;
   title: string;
   color: string;
-  location_point?: string;
+  location_point?: { lat: number; lng: number };
   is_public: boolean;
   street: string;
-  event_type: 'Show' | 'Rehearsal';
+  event_type: 'show' | 'rehearsalspace';
 }
