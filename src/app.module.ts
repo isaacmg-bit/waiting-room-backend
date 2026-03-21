@@ -15,6 +15,8 @@ import { UserGenresModule } from './user-genres/user-genres.module';
 import { UserBandsModule } from './user-bands/user-bands.module';
 import { MusicianSearchModule } from './musician-search/musician-search.module';
 import { CityModule } from './city/city.module';
+import { MusicbrainzController } from './musicbrainz-proxy/musicbrainz.controller';
+import { MusicbrainzService } from './musicbrainz-proxy/musicbrainz.service';
 
 @Module({
   imports: [
@@ -36,7 +38,7 @@ import { CityModule } from './city/city.module';
     MusicianSearchModule,
     CityModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, MusicbrainzController],
+  providers: [AppService, MusicbrainzService],
 })
 export class AppModule {}
