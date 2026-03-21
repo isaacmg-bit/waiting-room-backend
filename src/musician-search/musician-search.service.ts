@@ -114,7 +114,7 @@ export class MusicianSearchService {
     const { data, error } = await this.supabaseService
       .getClient()
       .rpc('feature_random_users', {
-        p_count: 4,
+        p_count: 10,
       });
 
     if (error) {

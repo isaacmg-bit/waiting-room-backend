@@ -90,7 +90,7 @@ export class MusicianSearchController {
   async getRandomMusicians(): Promise<MusicianSearchResult[]> {
     const { data, error } = await this.supabaseService
       .getClient()
-      .rpc('feature_random_users', { p_count: 4 });
+      .rpc('feature_random_users', { p_count: 10 });
     if (error)
       throw new Error(`Failed to get random musicians: ${error.message}`);
     return (data || []) as MusicianSearchResult[];
