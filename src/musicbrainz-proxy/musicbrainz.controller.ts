@@ -1,4 +1,3 @@
-// src/musicbrainz/musicbrainz.controller.ts
 import { Controller, Get, Query } from '@nestjs/common';
 import { MusicbrainzService } from './musicbrainz.service';
 

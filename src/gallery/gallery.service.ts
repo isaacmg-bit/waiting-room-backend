@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { CreateGalleryDto } from './dto/create-gallery.dto';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface GalleryPhoto {
   id: string;
@@ -18,19 +19,21 @@ export interface GalleryPhoto {
 
 @Injectable()
 export class GalleryService {
+  constructor(private supabaseService: SupabaseService) {}
   private readonly MAX_PHOTOS = 4;
 
-  constructor(private supabaseService: SupabaseService) {}
+  private clientOrDefault(client?: SupabaseClient) {
+    return client ?? this.supabaseService.getClient();
+  }
 
-  async create(userId: string, dto: CreateGalleryDto) {
+  async create(userId: string, dto: CreateGalleryDto, client?: SupabaseClient) {
     if (!userId || userId.trim().length === 0) {
       throw new BadRequestException('User ID is required');
     }
 
     try {
       const { data: existingPhotos, error: selectError } =
-        await this.supabaseService
-          .getClient()
+        await this.clientOrDefault(client)
           .from('user_gallery_photos')
           .select('id, position')
           .eq('user_id', userId);
@@ -52,8 +55,7 @@ export class GalleryService {
           ? this.validatePosition(dto.position, existingPhotos?.length || 0)
           : existingPhotos?.length || 0;
 
-      const { data, error } = await this.supabaseService
-        .getClient()
+      const { data, error } = await this.clientOrDefault(client)
         .from('user_gallery_photos')
         .insert([
           {
@@ -85,14 +87,16 @@ export class GalleryService {
     }
   }
 
-  async findByUserId(userId: string): Promise<GalleryPhoto[]> {
+  async findByUserId(
+    userId: string,
+    client?: SupabaseClient,
+  ): Promise<GalleryPhoto[]> {
     if (!userId || userId.trim().length === 0) {
       throw new BadRequestException('User ID is required');
     }
 
     try {
-      const { data, error } = await this.supabaseService
-        .getClient()
+      const { data, error } = await this.clientOrDefault(client)
         .from('user_gallery_photos')
         .select('*')
         .eq('user_id', userId)
@@ -111,7 +115,11 @@ export class GalleryService {
     }
   }
 
-  async remove(userId: string, photoId: string): Promise<any> {
+  async remove(
+    userId: string,
+    photoId: string,
+    client?: SupabaseClient,
+  ): Promise<any> {
     if (!userId || userId.trim().length === 0) {
       throw new BadRequestException('User ID is required');
     }
@@ -121,8 +129,9 @@ export class GalleryService {
     }
 
     try {
-      const { data: photo, error: selectError } = await this.supabaseService
-        .getClient()
+      const { data: photo, error: selectError } = await this.clientOrDefault(
+        client,
+      )
         .from('user_gallery_photos')
         .select('*')
         .eq('id', photoId)
@@ -143,8 +152,7 @@ export class GalleryService {
       }
 
       if (photo.url) {
-        const { error: storageError } = await this.supabaseService
-          .getClient()
+        const { error: storageError } = await this.clientOrDefault(client)
           .storage.from('gallery')
           .remove([photo.url]);
 
@@ -155,8 +163,7 @@ export class GalleryService {
         }
       }
 
-      const { error: deleteError } = await this.supabaseService
-        .getClient()
+      const { error: deleteError } = await this.clientOrDefault(client)
         .from('user_gallery_photos')
         .delete()
         .eq('id', photoId);

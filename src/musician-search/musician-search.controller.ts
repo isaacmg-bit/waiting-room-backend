@@ -10,15 +10,18 @@ import {
   MusicianSearchService,
   MusicianSearchResult,
 } from './musician-search.service';
-import { AuthGuard } from '@nestjs/passport';
+import { SupabaseTokenGuard } from 'src/supabase/supabase-token-guard';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 interface AuthRequest extends Request {
   user: {
     id: string;
+    [key: string]: any;
   };
+  supabaseClient: SupabaseClient;
 }
 
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(SupabaseTokenGuard)
 @Controller('search')
 export class MusicianSearchController {
   constructor(private readonly musicianSearchService: MusicianSearchService) {}
@@ -45,6 +48,8 @@ export class MusicianSearchController {
     const bandNames = this.parseCommaSeparated(bands);
     const theoryArray = this.parseCommaSeparated(theoryLevels);
 
+    const client = req.supabaseClient;
+
     return this.musicianSearchService.searchAdvancedByNames(
       req.user.id,
       radiusKmNum,
@@ -55,6 +60,7 @@ export class MusicianSearchController {
         theoryLevels: theoryArray,
       },
       limitNum,
+      client,
     );
   }
 
@@ -71,16 +77,22 @@ export class MusicianSearchController {
     const radiusKmNum = this.parseFloat(radiusKm, 'radiusKm');
     const limitNum = limit ? this.parseInt(limit, 'limit') : undefined;
 
+    const client = req.supabaseClient;
+
     return this.musicianSearchService.searchNearby(
       req.user.id,
       radiusKmNum,
       limitNum,
+      client,
     );
   }
 
   @Get('musicians/random')
-  async getRandomMusicians(): Promise<MusicianSearchResult[]> {
-    return this.musicianSearchService.searchRandom();
+  async getRandomMusicians(
+    @Req() req: AuthRequest,
+  ): Promise<MusicianSearchResult[]> {
+    const client = req.supabaseClient;
+    return this.musicianSearchService.searchRandom(client);
   }
 
   private parseCommaSeparated(value?: string): string[] | undefined {

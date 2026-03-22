@@ -7,7 +7,7 @@ import {
 import { CreateUserTheoryDto } from './dto/create-user-theory.dto';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from 'src/database.types'; // Ajusta la ruta si es necesario
+import type { Database } from 'src/database.types';
 
 @Injectable()
 export class UserTheoryService {
@@ -39,27 +39,23 @@ export class UserTheoryService {
     authUserId?: string,
   ) {
     try {
-      // Ensure caller can only modify their own record
       if (authUserId && authUserId !== userId) {
         console.warn('User id mismatch in upsert', { authUserId, userId });
         throw new ForbiddenException('You can only modify your own record');
       }
 
-      // Normalize DTO: when knows_theory is false, store explicit 'None'
       const normalizedTheoryLevel =
         dto.knows_theory === false ? 'None' : (dto.theory_level ?? null);
 
-      // Optional: simple validation of allowed levels (adjust allowed list as needed)
       const allowedLevels = ['None', 'Basic', 'Intermediate', 'Advanced', null];
       if (!allowedLevels.includes(normalizedTheoryLevel)) {
         throw new BadRequestException('Invalid theory_level');
       }
 
-      // Build payload and force ownership using authUserId when available
       const payload: Database['public']['Tables']['user_theory']['Insert'] = {
         user_id: authUserId ?? userId, // prefer authUserId if provided
         knows_theory: dto.knows_theory,
-        theory_level: normalizedTheoryLevel as string | null | undefined, // adjust if your generated type differs
+        theory_level: normalizedTheoryLevel as string | null | undefined,
       };
 
       console.info(
@@ -80,16 +76,13 @@ export class UserTheoryService {
       if (error) {
         console.error('Supabase error in upsert', error);
 
-        // RLS violation -> return 403
         if (error.code === '42501') {
           throw new ForbiddenException(
             'Row-level security prevented this operation',
           );
         }
 
-        // PostgREST single coercion error (should be avoided by maybeSingle, but handle defensively)
         if (error.code === 'PGRST116') {
-          // treat as not-found / no result rather than throwing 500
           return null;
         }
 
@@ -97,7 +90,6 @@ export class UserTheoryService {
       }
 
       if (!data) {
-        // If no row returned after upsert, surface a clear error
         throw new InternalServerErrorException(
           'Upsert did not return a record',
         );
@@ -105,7 +97,6 @@ export class UserTheoryService {
 
       return data;
     } catch (err) {
-      // rethrow http exceptions
       if (
         err &&
         typeof err === 'object' &&

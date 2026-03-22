@@ -29,11 +29,6 @@ export class UserInstrumentsController {
   @Get(':userId')
   getInstrumentsByUserId(@Param('userId') userId: string, @Req() req) {
     const client = req.supabaseClient;
-    console.debug(
-      '[user-instruments] getInstrumentsByUserId userId=%s auth=%o',
-      userId,
-      req.user?.id,
-    );
     return this.userInstrumentsService.findByUserId(userId, client);
   }
 

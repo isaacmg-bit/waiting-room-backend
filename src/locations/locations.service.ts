@@ -2,14 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class LocationsService {
   constructor(private supabaseService: SupabaseService) {}
 
-  async create(dto: CreateLocationDto): Promise<any> {
-    const { data, error } = await this.supabaseService
-      .getClient()
+  private clientOrDefault(client?: SupabaseClient) {
+    return client ?? this.supabaseService.getClient();
+  }
+
+  async create(dto: CreateLocationDto, client?: SupabaseClient): Promise<any> {
+    const { data, error } = await this.clientOrDefault(client)
       .from('locations')
       .insert(dto)
       .select()
@@ -20,9 +24,8 @@ export class LocationsService {
     return data;
   }
 
-  async findAll(): Promise<any> {
-    const { data, error } = await this.supabaseService
-      .getClient()
+  async findAll(client?: SupabaseClient): Promise<any> {
+    const { data, error } = await this.clientOrDefault(client)
       .from('locations')
       .select('*');
 
@@ -31,9 +34,8 @@ export class LocationsService {
     return data;
   }
 
-  async findOne(id: string): Promise<any> {
-    const { data, error } = await this.supabaseService
-      .getClient()
+  async findOne(id: string, client?: SupabaseClient): Promise<any> {
+    const { data, error } = await this.clientOrDefault(client)
       .from('locations')
       .select('*')
       .eq('id', id)
@@ -44,9 +46,12 @@ export class LocationsService {
     return data;
   }
 
-  async update(id: string, dto: UpdateLocationDto): Promise<any> {
-    const { data, error } = await this.supabaseService
-      .getClient()
+  async update(
+    id: string,
+    dto: UpdateLocationDto,
+    client?: SupabaseClient,
+  ): Promise<any> {
+    const { data, error } = await this.clientOrDefault(client)
       .from('locations')
       .update(dto)
       .eq('id', id)
@@ -58,9 +63,8 @@ export class LocationsService {
     return data;
   }
 
-  async remove(id: string): Promise<any> {
-    const { error } = await this.supabaseService
-      .getClient()
+  async remove(id: string, client?: SupabaseClient): Promise<any> {
+    const { error } = await this.clientOrDefault(client)
       .from('locations')
       .delete()
       .eq('id', id);

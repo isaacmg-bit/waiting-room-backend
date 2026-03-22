@@ -8,10 +8,15 @@ import {
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class EventsService {
   constructor(private supabaseService: SupabaseService) {}
+
+  private clientOrDefault(client?: SupabaseClient) {
+    return client ?? this.supabaseService.getClient();
+  }
 
   private toWkt(location?: { lat: number; lng: number } | null): string | null {
     if (location === undefined || location === null) return null;
@@ -40,7 +45,7 @@ export class EventsService {
     return `SRID=4326;POINT(${lng} ${lat})`;
   }
 
-  async create(userId: string, dto: CreateEventDto) {
+  async create(userId: string, dto: CreateEventDto, client?: SupabaseClient) {
     if (!userId || userId.trim().length === 0) {
       throw new BadRequestException('User ID is required');
     }
@@ -59,8 +64,7 @@ export class EventsService {
         location_point: wkt,
       };
 
-      const { data, error } = await this.supabaseService
-        .getClient()
+      const { data, error } = await this.clientOrDefault(client)
         .from('events')
         .insert(insertPayload)
         .select('id')
@@ -76,8 +80,7 @@ export class EventsService {
         throw new InternalServerErrorException('Failed to create event');
       }
 
-      const { data: row, error: rowErr } = await this.supabaseService
-        .getClient()
+      const { data: row, error: rowErr } = await this.clientOrDefault(client)
         .from('events_with_location')
         .select('*')
         .eq('id', data.id)
@@ -100,14 +103,13 @@ export class EventsService {
     }
   }
 
-  async findAllMe(userId: string): Promise<any[]> {
+  async findAllMe(userId: string, client?: SupabaseClient): Promise<any[]> {
     if (!userId || userId.trim().length === 0) {
       throw new BadRequestException('User ID is required');
     }
 
     try {
-      const { data, error } = await this.supabaseService
-        .getClient()
+      const { data, error } = await this.clientOrDefault(client)
         .from('events_with_location')
         .select('*')
         .eq('user_id', userId);
@@ -128,10 +130,9 @@ export class EventsService {
     }
   }
 
-  async findAllPublic(): Promise<any[]> {
+  async findAllPublic(client?: SupabaseClient): Promise<any[]> {
     try {
-      const { data, error } = await this.supabaseService
-        .getClient()
+      const { data, error } = await this.clientOrDefault(client)
         .from('events_with_location')
         .select('*')
         .eq('is_public', true);
@@ -152,7 +153,11 @@ export class EventsService {
     }
   }
 
-  async findOne(id: string, userId: string): Promise<any> {
+  async findOne(
+    id: string,
+    userId: string,
+    client?: SupabaseClient,
+  ): Promise<any> {
     if (!id || id.trim().length === 0) {
       throw new BadRequestException('Event ID is required');
     }
@@ -162,8 +167,7 @@ export class EventsService {
     }
 
     try {
-      const ownerRes = await this.supabaseService
-        .getClient()
+      const ownerRes = await this.clientOrDefault(client)
         .from('events_with_location')
         .select('*')
         .eq('id', id)
@@ -174,8 +178,7 @@ export class EventsService {
         return { ...ownerRes.data, date: ownerRes.data.event_date };
       }
 
-      const publicRes = await this.supabaseService
-        .getClient()
+      const publicRes = await this.clientOrDefault(client)
         .from('events_with_location')
         .select('*')
         .eq('id', id)
@@ -196,7 +199,12 @@ export class EventsService {
     }
   }
 
-  async update(id: string, dto: UpdateEventDto, userId: string): Promise<any> {
+  async update(
+    id: string,
+    dto: UpdateEventDto,
+    userId: string,
+    client?: SupabaseClient,
+  ): Promise<any> {
     if (!id || id.trim().length === 0) {
       throw new BadRequestException('Event ID is required');
     }
@@ -227,8 +235,7 @@ export class EventsService {
         updatePayload.location_point = wkt;
       }
 
-      const { data, error } = await this.supabaseService
-        .getClient()
+      const { data, error } = await this.clientOrDefault(client)
         .from('events')
         .update(updatePayload)
         .eq('id', id)
@@ -242,8 +249,7 @@ export class EventsService {
         );
       }
 
-      const { data: row, error: rowErr } = await this.supabaseService
-        .getClient()
+      const { data: row, error: rowErr } = await this.clientOrDefault(client)
         .from('events_with_location')
         .select('*')
         .eq('id', id)
@@ -267,7 +273,11 @@ export class EventsService {
     }
   }
 
-  async remove(id: string, userId: string): Promise<any> {
+  async remove(
+    id: string,
+    userId: string,
+    client?: SupabaseClient,
+  ): Promise<any> {
     if (!id || id.trim().length === 0) {
       throw new BadRequestException('Event ID is required');
     }
@@ -277,8 +287,7 @@ export class EventsService {
     }
 
     try {
-      const { data, error } = await this.supabaseService
-        .getClient()
+      const { data, error } = await this.clientOrDefault(client)
         .from('events')
         .delete()
         .eq('id', id)

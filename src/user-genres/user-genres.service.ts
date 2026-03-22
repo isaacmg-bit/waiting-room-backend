@@ -1,14 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { CreateUserGenreDto } from './dto/create-user-genre.dto';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class UserGenresService {
   constructor(private supabaseService: SupabaseService) {}
 
-  async findByUserId(userId: string) {
-    const { data, error } = await this.supabaseService
-      .getClient()
+  private clientOrDefault(client?: SupabaseClient) {
+    return client ?? this.supabaseService.getClient();
+  }
+
+  async findByUserId(userId: string, client?: SupabaseClient) {
+    const { data, error } = await this.clientOrDefault(client)
       .from('user_genres')
       .select('*, genres(*)')
       .eq('user_id', userId);
@@ -17,9 +21,12 @@ export class UserGenresService {
     return data;
   }
 
-  async create(userId: string, dto: CreateUserGenreDto) {
-    const { data, error } = await this.supabaseService
-      .getClient()
+  async create(
+    userId: string,
+    dto: CreateUserGenreDto,
+    client?: SupabaseClient,
+  ) {
+    const { data, error } = await this.clientOrDefault(client)
       .from('user_genres')
       .insert({
         user_id: userId,
@@ -32,9 +39,8 @@ export class UserGenresService {
     return data;
   }
 
-  async remove(id: string) {
-    const { data, error } = await this.supabaseService
-      .getClient()
+  async remove(id: string, client?: SupabaseClient) {
+    const { data, error } = await this.clientOrDefault(client)
       .from('user_genres')
       .delete()
       .eq('id', id)

@@ -21,9 +21,9 @@ export class UserTheoryController {
   @Get('me')
   async findMe(@Req() req) {
     const client = req.supabaseClient;
-    const authUserId = req.user?.id;
+    const userId = req.user?.id;
     const result = await this.userTheoryService.findByUserId(
-      authUserId,
+      userId,
       client,
     );
     if (!result) {
@@ -41,16 +41,16 @@ export class UserTheoryController {
   @Post()
   async create(@Req() req, @Body() dto: CreateUserTheoryDto) {
     const client = req.supabaseClient;
-    const authUserId = req.user?.id;
+    const userId = req.user?.id;
 
-    return this.userTheoryService.upsert(authUserId, dto, client, authUserId);
+    return this.userTheoryService.upsert(userId, dto, client);
   }
 
   @Patch('me')
   async update(@Req() req, @Body() dto: CreateUserTheoryDto) {
     const client = req.supabaseClient;
-    const authUserId = req.user?.id;
+    const userId = req.user?.id;
 
-    return this.userTheoryService.upsert(authUserId, dto, client, authUserId);
+    return this.userTheoryService.upsert(userId, dto, client);
   }
 }

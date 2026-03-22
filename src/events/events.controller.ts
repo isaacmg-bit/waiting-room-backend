@@ -9,29 +9,27 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { SupabaseTokenGuard } from 'src/supabase/supabase-token-guard';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-
-interface AuthenticatedRequest extends Request {
-  user: { id: string };
-}
 
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(SupabaseTokenGuard)
   @Post()
-  async create(@Req() req: AuthenticatedRequest, @Body() dto: CreateEventDto) {
-    return this.eventsService.create(req.user.id, dto);
+  async create(@Req() req, @Body() dto: CreateEventDto) {
+    const client = req.supabaseClient;
+    return this.eventsService.create(req.user.id, dto, client);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(SupabaseTokenGuard)
   @Get('me')
-  async findAllMe(@Req() req: AuthenticatedRequest) {
-    return this.eventsService.findAllMe(req.user.id);
+  async findAllMe(@Req() req) {
+    const client = req.supabaseClient;
+    return this.eventsService.findAllMe(req.user.id, client);
   }
 
   @Get('public')
@@ -39,25 +37,28 @@ export class EventsController {
     return this.eventsService.findAllPublic();
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(SupabaseTokenGuard)
   @Get(':id')
-  async findOne(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
-    return this.eventsService.findOne(id, req.user.id);
+  async findOne(@Param('id') id: string, @Req() req) {
+    const client = req.supabaseClient;
+    return this.eventsService.findOne(id, req.user.id, client);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(SupabaseTokenGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateEventDto,
-    @Req() req: AuthenticatedRequest,
+    @Req() req,
   ) {
-    return this.eventsService.update(id, dto, req.user.id);
+    const client = req.supabaseClient;
+    return this.eventsService.update(id, dto, req.user.id, client);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(SupabaseTokenGuard)
   @Delete(':id')
-  async remove(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
-    return this.eventsService.remove(id, req.user.id);
+  async remove(@Param('id') id: string, @Req() req) {
+    const client = req.supabaseClient;
+    return this.eventsService.remove(id, req.user.id, client);
   }
 }
