@@ -1,7 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  UseGuards,
+  Req,
+  Get,
+  Post,
+  Patch,
+  Param,
+  Body,
+} from '@nestjs/common';
 import { UserTheoryService } from './user-theory.service';
 import { CreateUserTheoryDto } from './dto/create-user-theory.dto';
-import { UseGuards, Req } from '@nestjs/common';
 import { SupabaseTokenGuard } from 'src/supabase/supabase-token-guard';
 
 @UseGuards(SupabaseTokenGuard)
@@ -11,21 +19,25 @@ export class UserTheoryController {
 
   @Get('me')
   findMe(@Req() req) {
-    return this.userTheoryService.findByUserId(req.user.id);
+    const client = req.supabaseClient;
+    return this.userTheoryService.findByUserId(req.user.id, client);
   }
 
   @Get(':userId')
-  getTheoryByUserId(@Param('userId') userId: string) {
-    return this.userTheoryService.findByUserId(userId);
+  findByUserId(@Param('userId') userId: string, @Req() req) {
+    const client = req.supabaseClient;
+    return this.userTheoryService.findByUserId(userId, client);
   }
 
   @Post()
   create(@Req() req, @Body() dto: CreateUserTheoryDto) {
-    return this.userTheoryService.upsert(req.user.id, dto);
+    const client = req.supabaseClient;
+    return this.userTheoryService.upsert(req.user.id, dto, client);
   }
 
   @Patch('me')
   update(@Req() req, @Body() dto: CreateUserTheoryDto) {
-    return this.userTheoryService.upsert(req.user.id, dto);
+    const client = req.supabaseClient;
+    return this.userTheoryService.upsert(req.user.id, dto, client);
   }
 }
