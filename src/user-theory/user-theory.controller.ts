@@ -3,11 +3,15 @@ import { UserTheoryService } from './user-theory.service';
 import { CreateUserTheoryDto } from './dto/create-user-theory.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UseGuards, Req } from '@nestjs/common';
+import { SupabasePerRequestService } from 'src/supabase/supabase-per-request-service';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('user-theory')
 export class UserTheoryController {
-  constructor(private readonly userTheoryService: UserTheoryService) {}
+  constructor(
+    private readonly userTheoryService: UserTheoryService,
+    private readonly sbPerRequest: SupabasePerRequestService,
+  ) {}
 
   @Get('me')
   findMe(@Req() req) {
@@ -28,4 +32,6 @@ export class UserTheoryController {
   update(@Req() req, @Body() dto: CreateUserTheoryDto) {
     return this.userTheoryService.upsert(req.user.id, dto);
   }
+
+  userId = await this.sbPerRequest.verifyTokenAndGetUserId(token);
 }

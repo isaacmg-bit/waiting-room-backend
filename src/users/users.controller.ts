@@ -1,70 +1,69 @@
 import {
   Controller,
+  UseGuards,
+  Req,
   Get,
   Post,
   Body,
   Patch,
   Param,
   Delete,
-  Req,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserProfileDto } from './dto/update-userprofile.dto';
-import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { CreateUserProfileDto } from './dto/create-userprofile.dto';
-import { SupabasePerRequestService } from '../supabase/supabase-per-request-service';
+import { SupabaseTokenGuard } from 'src/supabase/supabase-token-guard';
 
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(SupabaseTokenGuard)
 @Controller('users')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly sbPerRequest: SupabasePerRequestService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
-  @Get() findAll() {
-    return this.usersService.findAll();
+  @Get()
+  findAll(@Req() req) {
+    const client = req.supabaseClient;
+    return this.usersService.findAll(client);
   }
 
-  @Get('me') async getMe(@Req() req) {
+  @Get('me')
+  async getMe(@Req() req) {
     const userId = req.user.id;
-    const user = await this.usersService.findOne(userId);
+    const client = req.supabaseClient;
+
+    const user = await this.usersService.findOne(userId, client);
+
     if (!user) {
       return req.user;
     }
+
     return user;
   }
 
-  @Get(':id') findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  @Get(':id')
+  findOne(@Param('id') id: string, @Req() req) {
+    const client = req.supabaseClient;
+    return this.usersService.findOne(id, client);
   }
 
-  @Patch(':id') update(
+  @Patch(':id')
+  update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserProfileDto,
-  ) {
-    return this.usersService.update(id, updateUserDto);
-  }
-
-  @Delete(':id') remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
-  }
-
-  @Post('profile-sync') async create(
     @Req() req,
-    @Body() dto: CreateUserProfileDto,
   ) {
-    const authHeader = req.headers?.authorization as string | undefined;
-    if (!authHeader) {
-      throw new UnauthorizedException('Missing Authorization header');
-    }
-    const token = authHeader.replace(/^Bearer\s+/i, '');
-    if (!token) {
-      throw new UnauthorizedException('Malformed Authorization header');
-    }
+    const client = req.supabaseClient;
+    return this.usersService.update(id, updateUserDto, client);
+  }
 
-    const userId = await this.sbPerRequest.verifyTokenAndGetUserId(token);
+  @Delete(':id')
+  remove(@Param('id') id: string, @Req() req) {
+    const client = req.supabaseClient;
+    return this.usersService.remove(id, client);
+  }
+
+  @Post('profile-sync')
+  create(@Req() req, @Body() dto: CreateUserProfileDto) {
+    const client = req.supabaseClient;
+    return this.usersService.create(req.user.id, req.user.email, dto, client);
   }
 }
