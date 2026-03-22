@@ -1,10 +1,16 @@
-import { Controller, Get, Query, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+  Req,
+  BadRequestException,
+} from '@nestjs/common';
 import {
   MusicianSearchService,
   MusicianSearchResult,
 } from './musician-search.service';
 import { AuthGuard } from '@nestjs/passport';
-import { SupabaseService } from 'src/supabase/supabase.service';
 
 interface AuthRequest extends Request {
   user: {
@@ -15,84 +21,93 @@ interface AuthRequest extends Request {
 @UseGuards(AuthGuard('jwt'))
 @Controller('search')
 export class MusicianSearchController {
-  constructor(
-    private readonly musicianSearchService: MusicianSearchService,
-    private readonly supabaseService: SupabaseService,
-  ) {}
+  constructor(private readonly musicianSearchService: MusicianSearchService) {}
 
   @Get('musicians/advanced')
   async searchAdvanced(
     @Req() req: AuthRequest,
-    @Query('radiusKm') radiusKm: string,
+    @Query('radiusKm') radiusKm?: string,
     @Query('instruments') instruments?: string,
     @Query('genres') genres?: string,
     @Query('bands') bands?: string,
     @Query('theoryLevels') theoryLevels?: string,
     @Query('limit') limit?: string,
   ): Promise<MusicianSearchResult[]> {
-    if (!radiusKm) throw new Error('radiusKm is required');
+    if (!radiusKm) {
+      throw new BadRequestException('radiusKm query parameter is required');
+    }
 
-    const instrumentNames = instruments
-      ? instruments.split(',').map((i) => i.trim())
-      : undefined;
-    const genreNames = genres
-      ? genres.split(',').map((g) => g.trim())
-      : undefined;
-    const bandNames = bands ? bands.split(',').map((b) => b.trim()) : undefined;
-    const theoryArray = theoryLevels
-      ? theoryLevels.split(',').map((t) => t.trim())
-      : undefined;
+    const radiusKmNum = this.parseFloat(radiusKm, 'radiusKm');
+    const limitNum = limit ? this.parseInt(limit, 'limit') : undefined;
 
-    const genreIds = genreNames?.length
-      ? ((
-          await this.supabaseService
-            .getClient()
-            .from('genres')
-            .select('id')
-            .in('genre', genreNames)
-        ).data?.map((g) => g.id) ?? [])
-      : undefined;
+    const instrumentNames = this.parseCommaSeparated(instruments);
+    const genreNames = this.parseCommaSeparated(genres);
+    const bandNames = this.parseCommaSeparated(bands);
+    const theoryArray = this.parseCommaSeparated(theoryLevels);
 
-    const instrumentIds = instrumentNames?.length
-      ? ((
-          await this.supabaseService
-            .getClient()
-            .from('instruments')
-            .select('id')
-            .in('instrument_name', instrumentNames)
-        ).data?.map((i) => i.id ?? '') ?? [])
-      : undefined;
-
-    const bandIds = bandNames?.length
-      ? ((
-          await this.supabaseService
-            .getClient()
-            .from('user_bands')
-            .select('band_id')
-            .in('name', bandNames)
-        ).data?.map((b) => b.band_id) ?? [])
-      : undefined;
-
-    return this.musicianSearchService.searchAdvanced(
+    return this.musicianSearchService.searchAdvancedByNames(
       req.user.id,
-      parseFloat(radiusKm),
+      radiusKmNum,
       {
-        instruments: instrumentIds,
-        genres: genreIds,
-        bands: bandIds,
+        instruments: instrumentNames,
+        genres: genreNames,
+        bands: bandNames,
         theoryLevels: theoryArray,
       },
-      limit ? parseInt(limit, 10) : undefined,
+      limitNum,
+    );
+  }
+
+  @Get('musicians/nearby')
+  async searchNearby(
+    @Req() req: AuthRequest,
+    @Query('radiusKm') radiusKm?: string,
+    @Query('limit') limit?: string,
+  ): Promise<MusicianSearchResult[]> {
+    if (!radiusKm) {
+      throw new BadRequestException('radiusKm query parameter is required');
+    }
+
+    const radiusKmNum = this.parseFloat(radiusKm, 'radiusKm');
+    const limitNum = limit ? this.parseInt(limit, 'limit') : undefined;
+
+    return this.musicianSearchService.searchNearby(
+      req.user.id,
+      radiusKmNum,
+      limitNum,
     );
   }
 
   @Get('musicians/random')
   async getRandomMusicians(): Promise<MusicianSearchResult[]> {
-    const { data, error } = await this.supabaseService
-      .getClient()
-      .rpc('feature_random_users', { p_count: 10 });
-    if (error)
-      throw new Error(`Failed to get random musicians: ${error.message}`);
-    return (data || []) as MusicianSearchResult[];
+    return this.musicianSearchService.searchRandom();
+  }
+
+  private parseCommaSeparated(value?: string): string[] | undefined {
+    if (!value) return undefined;
+    return value
+      .split(',')
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  }
+
+  private parseFloat(value: string, fieldName: string): number {
+    const num = parseFloat(value);
+    if (isNaN(num)) {
+      throw new BadRequestException(
+        `${fieldName} must be a valid number, got: ${value}`,
+      );
+    }
+    return num;
+  }
+
+  private parseInt(value: string, fieldName: string): number {
+    const num = parseInt(value, 10);
+    if (isNaN(num)) {
+      throw new BadRequestException(
+        `${fieldName} must be a valid integer, got: ${value}`,
+      );
+    }
+    return num;
   }
 }

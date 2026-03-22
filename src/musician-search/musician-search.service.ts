@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { SupabaseService } from 'src/supabase/supabase.service';
+import { FilterResolverService } from './musician-search.filter.resolver';
 
 export interface SearchMusiciansParams {
   userId: string;
@@ -26,7 +27,40 @@ export interface MusicianSearchResult {
 
 @Injectable()
 export class MusicianSearchService {
-  constructor(private supabaseService: SupabaseService) {}
+  constructor(
+    private supabaseService: SupabaseService,
+    private filterResolver: FilterResolverService,
+  ) {}
+
+  async searchAdvancedByNames(
+    userId: string,
+    radiusKm: number,
+    filters: {
+      instruments?: string[];
+      genres?: string[];
+      bands?: string[];
+      theoryLevels?: string[];
+    },
+    limit?: number,
+  ): Promise<MusicianSearchResult[]> {
+    this.validateSearchParams(userId, radiusKm);
+
+    const resolvedFilters = await this.filterResolver.resolveAllFilters({
+      instruments: filters.instruments,
+      genres: filters.genres,
+      bands: filters.bands,
+    });
+
+    return this.searchMusicians({
+      userId,
+      radiusKm,
+      instrumentFilter: resolvedFilters.instrumentIds,
+      genreFilter: resolvedFilters.genreIds,
+      bandFilter: resolvedFilters.bandIds,
+      theoryLevels: filters.theoryLevels,
+      limit,
+    });
+  }
 
   async searchMusicians(
     params: SearchMusiciansParams,
@@ -42,6 +76,8 @@ export class MusicianSearchService {
       offset = 0,
     } = params;
 
+    this.validateSearchParams(userId, radiusKm);
+
     const { data, error } = await this.supabaseService
       .getClient()
       .rpc('search_musicians', {
@@ -56,7 +92,7 @@ export class MusicianSearchService {
       });
 
     if (error) {
-      throw new Error(`Search failed: ${error.message}`);
+      throw new BadRequestException(`Search failed: ${error.message}`);
     }
 
     return (data || []) as MusicianSearchResult[];
@@ -88,28 +124,6 @@ export class MusicianSearchService {
     });
   }
 
-  async searchAdvanced(
-    userId: string,
-    radiusKm: number,
-    filters: {
-      instruments?: string[];
-      genres?: string[];
-      bands?: string[];
-      theoryLevels?: string[];
-    },
-    limit?: number,
-  ): Promise<MusicianSearchResult[]> {
-    return this.searchMusicians({
-      userId,
-      radiusKm,
-      instrumentFilter: filters.instruments,
-      genreFilter: filters.genres,
-      bandFilter: filters.bands,
-      theoryLevels: filters.theoryLevels,
-      limit,
-    });
-  }
-
   async searchRandom(): Promise<MusicianSearchResult[]> {
     const { data, error } = await this.supabaseService
       .getClient()
@@ -118,9 +132,25 @@ export class MusicianSearchService {
       });
 
     if (error) {
-      throw new Error(`Search failed: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to fetch random musicians: ${error.message}`,
+      );
     }
 
     return (data || []) as MusicianSearchResult[];
+  }
+
+  private validateSearchParams(userId: string, radiusKm: number): void {
+    if (!userId || userId.trim().length === 0) {
+      throw new BadRequestException('User ID is required');
+    }
+
+    if (!radiusKm || radiusKm <= 0) {
+      throw new BadRequestException('Radius must be greater than 0');
+    }
+
+    if (radiusKm > 500) {
+      throw new BadRequestException('Radius cannot exceed 500 km');
+    }
   }
 }
