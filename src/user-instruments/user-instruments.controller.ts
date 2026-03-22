@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Req,
   Post,
   Body,
   Param,
@@ -9,11 +10,10 @@ import {
 } from '@nestjs/common';
 import { UserInstrumentsService } from './user-instruments.service';
 import { CreateUserInstrumentDto } from './dto/create-user-instrument.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { Req } from '@nestjs/common';
+import { SupabaseTokenGuard } from 'src/supabase/supabase-token-guard';
 import { UseGuards } from '@nestjs/common';
 
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(SupabaseTokenGuard)
 @Controller('user-instruments')
 export class UserInstrumentsController {
   constructor(
@@ -22,7 +22,8 @@ export class UserInstrumentsController {
 
   @Get('me')
   findAll(@Req() req) {
-    return this.userInstrumentsService.findByUserId(req.user.id);
+    const client = req.supabaseClient;
+    return this.userInstrumentsService.findByUserId(req.user.id, client);
   }
 
   @Get(':userId')
@@ -32,7 +33,8 @@ export class UserInstrumentsController {
 
   @Post()
   create(@Req() req, @Body() dto: CreateUserInstrumentDto) {
-    return this.userInstrumentsService.create(req.user.id, dto);
+    const client = req.supabaseClient;
+    return this.userInstrumentsService.create(req.user.id, dto, client);
   }
 
   @Patch(':id')
