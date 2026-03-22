@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
 import { UserTheoryService } from './user-theory.service';
 import { CreateUserTheoryDto } from './dto/create-user-theory.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { UseGuards, Req } from '@nestjs/common';
+import { SupabaseTokenGuard } from 'src/supabase/supabase-token-guard';
 
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(SupabaseTokenGuard)
 @Controller('user-theory')
 export class UserTheoryController {
   constructor(private readonly userTheoryService: UserTheoryService) {}

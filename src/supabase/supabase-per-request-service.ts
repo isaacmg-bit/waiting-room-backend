@@ -16,6 +16,17 @@ export class SupabasePerRequestService {
     });
   }
 
+  async verifyTokenAndGetUserId(userJwt: string): Promise<string> {
+    const client = this.createClientForUser(userJwt);
+    const { data, error } = await client.auth.getUser();
+
+    if (error || !data?.user) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+
+    return data.user.id;
+  }
+
   async verifyTokenAndGetUser(
     userJwt: string,
   ): Promise<{ id: string; email?: string }> {
