@@ -1,12 +1,15 @@
-import { IsUUID, IsString, IsEnum } from 'class-validator';
+import { IsUUID, IsString, IsIn } from 'class-validator';
+
+export const LEVELS = ['Beginner', 'Intermediate', 'Advanced'] as const;
+export type Level = (typeof LEVELS)[number];
 
 export class CreateUserInstrumentDto {
   @IsUUID('4', { message: 'instrument_id must be a valid UUID' })
   instrument_id: string;
 
   @IsString()
-  @IsEnum(['beginner', 'intermediate', 'advanced', 'expert'], {
-    message: 'level must be one of: beginner, intermediate, advanced, expert',
+  @IsIn(LEVELS, {
+    message: 'level must be one of: Beginner, Intermediate, Advanced',
   })
-  level: string;
+  level: Level;
 }
