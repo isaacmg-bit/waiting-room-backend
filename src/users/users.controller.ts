@@ -54,6 +54,7 @@ export class UsersController {
 
   @Post('profile-sync')
   create(@Req() req, @Body() dto: CreateUserProfileDto) {
+    console.log('Authorization header:', req.headers.authorization);
     return this.usersService.create(req.user.id, req.user.email, dto);
   }
 }
