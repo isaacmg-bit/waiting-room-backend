@@ -7,11 +7,11 @@ import {
   Patch,
   Param,
   Body,
+  NotFoundException,
 } from '@nestjs/common';
 import { UserTheoryService } from './user-theory.service';
 import { CreateUserTheoryDto } from './dto/create-user-theory.dto';
 import { SupabaseTokenGuard } from 'src/supabase/supabase-token-guard';
-import { NotFoundException } from '@nestjs/common';
 
 @UseGuards(SupabaseTokenGuard)
 @Controller('user-theory')
@@ -21,8 +21,9 @@ export class UserTheoryController {
   @Get('me')
   async findMe(@Req() req) {
     const client = req.supabaseClient;
+    const authUserId = req.user?.id;
     const result = await this.userTheoryService.findByUserId(
-      req.user.id,
+      authUserId,
       client,
     );
     if (!result) {
@@ -32,20 +33,24 @@ export class UserTheoryController {
   }
 
   @Get(':userId')
-  findByUserId(@Param('userId') userId: string, @Req() req) {
+  async findByUserId(@Param('userId') userId: string, @Req() req) {
     const client = req.supabaseClient;
     return this.userTheoryService.findByUserId(userId, client);
   }
 
   @Post()
-  create(@Req() req, @Body() dto: CreateUserTheoryDto) {
+  async create(@Req() req, @Body() dto: CreateUserTheoryDto) {
     const client = req.supabaseClient;
-    return this.userTheoryService.upsert(req.user.id, dto, client);
+    const authUserId = req.user?.id;
+
+    return this.userTheoryService.upsert(authUserId, dto, client, authUserId);
   }
 
   @Patch('me')
-  update(@Req() req, @Body() dto: CreateUserTheoryDto) {
+  async update(@Req() req, @Body() dto: CreateUserTheoryDto) {
     const client = req.supabaseClient;
-    return this.userTheoryService.upsert(req.user.id, dto, client);
+    const authUserId = req.user?.id;
+
+    return this.userTheoryService.upsert(authUserId, dto, client, authUserId);
   }
 }
