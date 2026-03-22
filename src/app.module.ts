@@ -17,6 +17,7 @@ import { MusicianSearchModule } from './musician-search/musician-search.module';
 import { CityModule } from './city/city.module';
 import { MusicbrainzController } from './musicbrainz-proxy/musicbrainz.controller';
 import { MusicbrainzService } from './musicbrainz-proxy/musicbrainz.service';
+import { SupabasePerRequestService } from './supabase/supabase-per-request-service';
 
 @Module({
   imports: [
@@ -39,6 +40,6 @@ import { MusicbrainzService } from './musicbrainz-proxy/musicbrainz.service';
     CityModule,
   ],
   controllers: [AppController, MusicbrainzController],
-  providers: [AppService, MusicbrainzService],
+  providers: [AppService, MusicbrainzService, SupabasePerRequestService],
 })
 export class AppModule {}

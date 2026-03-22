@@ -2,25 +2,28 @@ import { Injectable } from '@nestjs/common';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { UpdateUserProfileDto } from './dto/update-userprofile.dto';
 import { CreateUserProfileDto } from './dto/create-userprofile.dto';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class UsersService {
   constructor(private supabaseService: SupabaseService) {}
 
-  async findAll() {
-    const { data, error } = await this.supabaseService
-      .getClient()
+  private clientOrDefault(client?: SupabaseClient) {
+    return client ?? this.supabaseService.getClient();
+  }
+
+  async findAll(client?: SupabaseClient) {
+    const { data, error } = await this.clientOrDefault(client)
       .from('user_profile')
-      .select('*');
+      .select('');
 
     if (error) throw error;
 
     return data;
   }
 
-  async findOne(id: string) {
-    const { data, error } = await this.supabaseService
-      .getClient()
+  async findOne(id: string, client?: SupabaseClient) {
+    const { data, error } = await this.clientOrDefault(client)
       .from('user_profile')
       .select('*')
       .eq('id', id)
@@ -31,9 +34,12 @@ export class UsersService {
     return data;
   }
 
-  async update(id: string, updateUserDto: UpdateUserProfileDto) {
-    const { data, error } = await this.supabaseService
-      .getClient()
+  async update(
+    id: string,
+    updateUserDto: UpdateUserProfileDto,
+    client?: SupabaseClient,
+  ) {
+    const { data, error } = await this.clientOrDefault(client)
       .from('user_profile')
       .update(updateUserDto)
       .eq('id', id)
@@ -45,9 +51,8 @@ export class UsersService {
     return data;
   }
 
-  async remove(id: string) {
-    const { data, error } = await this.supabaseService
-      .getClient()
+  async remove(id: string, client?: SupabaseClient) {
+    const { data, error } = await this.clientOrDefault(client)
       .from('user_profile')
       .delete()
       .eq('id', id)
@@ -59,9 +64,13 @@ export class UsersService {
     return data;
   }
 
-  async create(id: string, email: string, dto: CreateUserProfileDto) {
-    const { data, error } = await this.supabaseService
-      .getClient()
+  async create(
+    id: string,
+    email: string,
+    dto: CreateUserProfileDto,
+    client?: SupabaseClient,
+  ) {
+    const { data, error } = await this.clientOrDefault(client)
       .from('user_profile')
       .insert({
         id,
