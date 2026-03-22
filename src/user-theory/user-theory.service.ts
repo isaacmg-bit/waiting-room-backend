@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateUserTheoryDto } from './dto/create-user-theory.dto';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -15,9 +19,14 @@ export class UserTheoryService {
     const { data, error } = await this.clientOrDefault(client)
       .from('user_theory')
       .select('*')
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error in findByUserId', error);
+      throw new InternalServerErrorException('Database error');
+    }
+
     return data;
   }
 
@@ -37,9 +46,17 @@ export class UserTheoryService {
         { onConflict: 'user_id' },
       )
       .select()
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error in upsert', error);
+      throw new InternalServerErrorException('Database error');
+    }
+
+    if (!data) {
+      throw new NotFoundException('Upsert did not return a record');
+    }
+
     return data;
   }
 }
