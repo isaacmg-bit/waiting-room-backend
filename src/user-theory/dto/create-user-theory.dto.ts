@@ -1,14 +1,21 @@
-import { IsBoolean, IsString, IsEnum, ValidateIf } from 'class-validator';
+import { IsBoolean, IsString, IsIn, ValidateIf } from 'class-validator';
+
+export const THEORY_LEVELS = [
+  'Basic',
+  'Composition',
+  'Advanced Orchestration',
+] as const;
+export type TheoryLevel = (typeof THEORY_LEVELS)[number];
 
 export class CreateUserTheoryDto {
   @IsBoolean()
   knows_theory: boolean;
 
+  @ValidateIf((o) => o.knows_theory === true)
   @IsString()
-  @IsEnum(['Basic', 'Composition', 'Advanced Orchestration'], {
+  @IsIn(THEORY_LEVELS, {
     message:
       'theory_level must be one of: Basic, Composition, Advanced Orchestration',
   })
-  @ValidateIf((obj) => obj.knows_theory === true)
-  theory_level: string;
+  theory_level?: TheoryLevel;
 }
