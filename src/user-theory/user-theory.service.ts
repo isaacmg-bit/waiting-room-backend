@@ -7,6 +7,7 @@ import {
 import { CreateUserTheoryDto } from './dto/create-user-theory.dto';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from 'src/database.types'; // Ajusta la ruta si es necesario
 
 @Injectable()
 export class UserTheoryService {
@@ -55,10 +56,10 @@ export class UserTheoryService {
       }
 
       // Build payload and force ownership using authUserId when available
-      const payload: Record<string, any> = {
+      const payload: Database['public']['Tables']['user_theory']['Insert'] = {
         user_id: authUserId ?? userId, // prefer authUserId if provided
         knows_theory: dto.knows_theory,
-        theory_level: normalizedTheoryLevel,
+        theory_level: normalizedTheoryLevel as string | null | undefined, // adjust if your generated type differs
       };
 
       console.info(
@@ -105,7 +106,13 @@ export class UserTheoryService {
       return data;
     } catch (err) {
       // rethrow http exceptions
-      if (err.status && err.response) throw err;
+      if (
+        err &&
+        typeof err === 'object' &&
+        'status' in err &&
+        'response' in err
+      )
+        throw err;
       console.error('Unexpected error in upsert', err);
       throw new InternalServerErrorException('Unexpected server error');
     }
